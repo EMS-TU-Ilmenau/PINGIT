@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     REMOTES = 'remotes'
     TOKEN = 'token'
-    DETACHED = '<detached>'
+    DETACHED = '~detached~'
     ARG_PATH = {
         TOKEN: ('-p', '--path'), 'default': '.',
         'help': 'Use different path than current directory.'
@@ -444,11 +444,12 @@ if __name__ == '__main__':
                     repopath, branch,
                     '(%d untracked files)' %(untracked) if untracked else ''
                 )
-                if len(repo.remotes) == 0 or branch == DETACHED:
+
+                if len(repo.remotes) == 0:
                     talked = True
                     warning(status + ' has no remotes.')
 
-                if len(repo.active_branch.log()) == 0:
+                if branch != DETACHED or len(repo.active_branch.log()) == 0:
                     if args.verbose:
                         talked = True
                         info('%s has no commits yet' %(status, ))
