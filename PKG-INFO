@@ -1,0 +1,62 @@
+Metadata-Version: 1.1
+Name: pingit
+Version: 0.1
+Summary: Compute Cluster Cuisine for Python
+Home-page: https://ems-tu-ilmenau.github.io/PINGIT/
+Author: Christoph Wagner, EMS group TU Ilmenau
+Author-email: christoph.wagner@tu-ilmenau.de
+License: Apache Software License
+Description:
+
+  # PINGIT batch management tool for multiple nested git repositories
+
+  ## Description
+  PINGIT generates an index of all git repositories and their directory
+  structure of the current working directory and work with it.
+
+  Currently PINGIT supports:
+     - Export and import (batch-clone) the directory structure
+     - List the directory structure
+     - Ping, fetch and pull the remotes of all repos within that structure
+     - Show the status of all repos within that structure
+     - Archive all repos within that structure (for backup purposes)
+
+  Pingit is written in Python and supports Python2 and Python3 since
+  Python 2.7+
+
+  ### Dependencies
+  - gitpython
+  - arghandler
+
+  ### Contact the Authors
+  Pingit was developed by Christoph Wagner at the EMS Research Group, Institute
+  for Information Technology, Technische Universität Ilmenau. Please check out
+  https://www.tu-ilmenau.de/it-ems/ or contact the author via Mail on
+  christoph.wagner@tu-ilmenau.de
+
+  ### Issues
+  If you experience problems or missing a feature please feel free to open an
+  issue at our github project page: http://github.com/EMS-TU-Ilmenau/PINGIT.
+
+  ### Contributing
+  Please feel free to fork this repository and feed back your changes via
+  pull-request.
+
+Keywords: git repository management archive batch, utility, version control, mirroring, backup, quality assurance
+Development Status :: 3 - Alpha
+Environment :: Console
+Intended Audience :: Developers
+Intended Audience :: End Users/Desktop
+Intended Audience :: System Administrators
+License :: OSI Approved :: Apache Software License
+Natural Language :: English
+Operating System :: POSIX :: Linux
+Operating System :: MacOS :: MacOS X
+Operating System :: Microsoft :: Windows
+Programming Language :: Python :: 2.7
+Programming Language :: Python :: 3
+Topic :: Software Development :: Quality Assurance
+Topic :: Software Development :: Version Control :: Git
+Topic :: System :: Archiving :: Backup
+Topic :: System :: Archiving :: Mirroring
+Topic :: Utilities

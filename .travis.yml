@@ -1,0 +1,50 @@
+language: python
+os: linux
+sudo: required
+branches:
+  only:
+  - master
+services:
+- docker
+matrix:
+  include:
+  - python: '3.7'
+    dist: xenial
+    sudo: true
+  - python: '2.7'
+    if: type != pull_request
+install:
+- echo "$TRAVIS_BRANCH $TRAVIS_PYTHON_VERSION $PYTHON"
+- |
+  if [[ "$TRAVIS_BRANCH" == "stable" ]] ; then
+      pip install cibuildwheel==0.9.4 twine
+  else
+      if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" ]] ; then
+          pip install coverage coveralls
+      fi
+  fi
+script:
+- pip install .
+- pingit list
+- pingit export
+- pingit export -o structure.json
+- pingit import -i structure.json -o import
+- pingit fetch
+- pingit pull --rebase
+- pingit status
+- pingit archive -o backup
+- pingit archive -o backup --no-timestamp
+- pingit archive -o backup --format zip
+- ll */*
+deploy:
+  provider: pypi
+  skip_existing: true
+  distributions: sdist bdist_wheel
+  tags: true
+  on:
+    branch: stable
+    python: 3.7
+  user:
+    secure: qFZdH/zNP5NPag/dIrMDQFHpCec/bQWqPesBtyjtGVrmPvvu4NLmfDmYW1Rrfl2Gy/cP40XfXXp/uz8oxtBKEMXn6k3iR2XS0agqSY4/HJQT1iEbGyXF0+kGdS6Stsx8B93SYIsU4kuq6rXJZ+kY2g4QVqKo17nWk7qrHRJsumaCY1VeBeseHgSXyleTC6FVPGYDgl05oXWqwfHLOu8VYDUJXc7kiXZyRtwbFmVVfOtgN/Ay/vWxGmRl2bTDQUoDMPJ8ISWekwbwZ57+WtVT/nnIXiulLZcquNAqPFXZ2SZqhPSzuzZ/26azbKwdAxmFrG1d/XyoCxZDMTlOvnN2ajpTZ9wQZTqN9JrU1iJVgpoqBs4IDseKutJNeSUIUk1mI4uHtMMBhpjGtKRIl9rRH0lb47DLaxb2/XiwmtExFbfw6vbmT1F+XMV7xT0mPs+9eMfwzq7RaNbcEDo09qW0jbIKxocr1ckap8FZxTyrjZGbzTqzXkgMsGty77H+52X06JXhpD0Uqm83s/3Ssycic5WwCpb4PRNwNgpT7nKWYzdJ6T1R6jKYqmERiUhDWW8Hd856C6yewwA8vshW2YYs+3mPw3A52jyLNOLGvBzYkJlNmK+O1H+FIjFtkjK8OtiQO0ILsuGHX9wUJjf7he0g/uHF5hd1armmJ87RHCpIpaM=
+  password:
+    secure: 1KAULZBhHMo30NBV5IeA47a/GN4KWdngMQziDphbnvwS4DHnd5hh2WdCalp8EOJxQ3hnso3UbdCiNTcyvTAXAlSMFnYTylfdWBZUetOQofMCky1DtF/d1+NME1tqVow3xUsSbnjIW1uUdWNwsUIaI6iWrOa4jW27GZeOlON94ARdc3Yg1HLjvuq/pSWINuqJeFZMJP/dpbG8N84LElS6zZJL6S9HlbRDqOtPPdgSh/Sux3X5rJhn3it+kf7Jy70yZ7b0O/+frabHTCLnLIrGlPPSP6PJQgebX4i1/1wxrP0sOfaraRgUMpGlxTXNtbrv7kg1up891OoiwGLAPpKLjcAzMj2JC6n5WDt9AP7RsIkKb8GZAqHCysAbFl/WLcry4p/t+W+aw9YNyqz04FnTA3VXuJwOwRZuMBNK0PeX+UJptJh+OqlQSlnTI622l//AzBT5CquQ8Rl7GZ+0NMd/uNy0rp0g5MlsqKChrdhDNd/PrOOA+m2+/RVLlBy8FY03qECrC8uhLUmkffLU11LHs3N4Oro8ZPFxnxhucVeGWkP/LdeWMj8BR99TsrUlW3psZey+NvVcv7mXV3VZc/pbLywblbjZj8VEarvZNgU8AW5SIG8IqYkY5HlTtajggRAPTIqTxoevwJA+IFEVfov8EKoYcDvqyukmWY1OV/7HIe0=

@@ -1,0 +1,614 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Copyright 2019 Christoph Wagner
+#     https://www.tu-ilmenau.de/it-ems/
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#  PURPOSE
+#  =======
+#  Generate an index of all git repositories and their directory structure of
+#  the current working directory and works with it. Currently PINGIT supports:
+#   - Export and import (batch-clone) the directory structure
+#   - List the directory structure
+#   - Ping, fetch and pull the remotes of all repos within that structure
+#   - Show the status of all repos within that structure
+#   - Archive all repos within that structure (for backup purposes)
+#
+#  Requires: arghandler, gitpython
+#
+#  Author: Christoph Wagner, 04.01.2019, EMS Research Group TU Ilmenau
+#
+
+__version__ = 0.1
+
+import sys
+import os
+import json
+import git
+import logging
+from logging import info, warning, error
+from arghandler import *
+
+# some constant definitions
+REMOTES = 'remotes'
+TOKEN = 'token'
+ARG_PATH = {
+    TOKEN: ('-p', '--path'), 'default': '.',
+    'help': 'Use different path than current directory.'
+}
+ARG_INPUT = {
+    TOKEN: ('-i', '--input'), 'default': None,
+    'help': 'Input file. If not specified, read from STDIN.'
+}
+ARG_OUTPUT = {
+    TOKEN: ('-o', '--output'), 'default': None,
+    'help': 'Output file. If not specified, write to STDOUT.'
+}
+ARG_OUTPATH = {
+    TOKEN: ('-o', '--output'), 'default': '.',
+    'help': 'Output directory. If not specified, write to current directory.'
+}
+ARG_LIST = {
+    TOKEN: ('-l', '--list'), 'default': None,
+    'help': 'Instead of a recursive search for repos, take this list.'
+}
+ARG_VERBOSE = {
+    TOKEN: ('-v', '--verbose'), 'action': 'store_true',
+    'help': 'Increase verbosity of output.'
+}
+
+
+def clearline():
+    sys.stdout.write("\033[K") # Clear to the end of line
+
+
+def add_arguments(parser, *args):
+    """Wrapper to call parser.add_argument(*arg) for each arg in args."""
+    for arg in args:
+        token = arg.pop(TOKEN, ())
+        parser.add_argument(*token, **arg)
+
+
+def add_repo(repopath, rootpath, repos):
+    """Try loading a git repository and add it to 'repos' if successful.
+
+    Parameters
+    ----------
+    repopath : str
+        A relative path pointing to the repository to add.
+    rootpath : str
+        Absolute path specification for the relative locations in 'repos'.
+    repos : dict
+        A dictionary containing git.Repo objects as values and their working
+        tree directories relative to 'rootpath' as keys. Each entry represents
+        a valid git repository.
+
+    Returns
+    -------
+    bool
+        True if the repository could be loaded successfully, False if the path
+        does not exist or does not contain a valid git repository.
+    """
+    try:
+        # index this repository and remember we found one
+        repo = git.Repo(repopath)
+        repos[os.path.relpath(repo.working_tree_dir, rootpath)] = repo
+        return True
+    except git.exc.InvalidGitRepositoryError:
+        return False
+    except git.exc.NoSuchPathError:
+        return False
+    raise RuntimeError('Invalid Execution path in add_repo')
+
+
+def find_repos(path):
+    """
+    Find git repositories in path. Crawling does notdescent into detected git
+    repos, i.e. it does not find submodules as separate repositories.
+    Directories containing no nested repositories will be reported as a list.
+
+    Parameters
+    ----------
+    path : str
+        Root directory to crawl for git repositories. Can be an absolute or a
+        relative path.
+
+    Returns
+    -------
+    tuple
+        repos : dict
+            Contains all repositories found nested within root as key-value
+            pair with its root directory as key and a git.Repo object as
+            value.
+        repopath : str
+            Root directory for repository index.
+    """
+    # determine absolute path to root
+    rootpath = os.path.abspath(path)
+
+    def _crawl(path):
+        """Recursive crawler for find_repos().
+
+        Returns a tuple of (dict repo, list norepo) containing the found
+        repositories with its root path as key and a git.Repo object as value.
+        The norepo list informs about subdirectories in path that do not
+        contain any nested git repositories.
+        """
+        repos = {}
+        norepo = []
+        has_repo = False
+
+        # get subdirectories of current path only (a lot faster than listdir())
+        for _, subdirs, _ in os.walk(path):
+            break
+
+        subdirs = map(lambda name: os.path.join(path, name), subdirs)
+
+        # crawl subdirectories
+        for subdir in subdirs:
+            if add_repo(subdir, rootpath, repos):
+                has_repo = True
+            else:
+                # dig into this directory and look for nested repos
+                child_repos, child_norepo = _crawl(subdir)
+                norepo.extend(child_norepo)
+                if len(child_repos) > 0:
+                    repos.update(child_repos)
+                    has_repo = True
+
+        # if we haven't found any repos nested here, just return the path's name
+        if not has_repo:
+            return repos, [path]
+        else:
+            return repos, norepo
+
+    # perform the crawling search
+    repos, norepo = _crawl(rootpath)
+    for subdir in norepo:
+        warning('No git repositories found in %s'% (subdir, ))
+
+    return (repos, rootpath)
+
+
+class Progress(git.remote.RemoteProgress):
+    """Handler for showing progress of long-running git commands."""
+    def line_dropped(self, line):
+        clearline()
+        sys.stdout.write(self._cur_line + '\r')
+        sys.stdout.flush()
+
+    def update(self, *args):
+        self.line_dropped('')
+
+
+def input_file_or_stdin(args, function):
+    """Perform a data import from file or stdin, depending on arguments.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Argument namespace containing the argument 'input'. If this is None,
+        the data will be imported from stdin. Otherwise the file specified by
+        'input' will be opened for reading and passed instead.
+    function : callable(file)
+        Import function taking a source file handle as argument returning data.
+
+    Returns
+    -------
+    object
+        Returns result from calling 'function'.
+    """
+    if args.input is None:
+        return function(sys.stdin)
+    else:
+        with open(args.input, 'r') as infile:
+            return function(infile)
+
+
+def output_file_or_stdout(args, data, function):
+    """Perform a data export to file or stdout, depending on arguments.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Argument namespace containing the argument 'input'. If this is None,
+        the data will be exported to stdout. Otherwise the file specified by
+        'output' will be opened for writing and passed instead.
+    data : object
+        The data object to be exported.
+    function : callable(file, data)
+        Export function taking a destination file handle and the data.
+
+    Returns
+    -------
+    object
+        Returnes result from calling 'function'.
+    """
+    if args.output is None:
+        return function(sys.stdout, data)
+    else:
+        with open(args.output, 'w') as outfile:
+            return function(outfile, data)
+
+
+def get_repos(args):
+    """Return a list of git repos either from a list determined by the 'list'
+    argument or by crawling the current working directory or the one specified
+    by the 'path' argument.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Namespace to take the arguments 'list' and 'path' from.
+
+    Returns
+    -------
+    tuple
+        Contains repository index and its corresponding root directory. See
+        the documentation of find_repos() return value for more details.
+    """
+    if not hasattr(args, 'list') or args.list is None:
+        return find_repos(args.path)
+    else:
+        rootpath = os.path.abspath(args.path)
+        repos = {}
+        with open(args.list, 'r') as listfile:
+            for line in listfile:
+                relpath = os.path.relpath(line.strip(), rootpath)
+                if not add_repo(relpath, rootpath, repos):
+                    warning(
+                        'No git repository found in %s'% (relpath, )
+                    )
+
+        return (repos, rootpath)
+
+
+@subcmd('export')
+def cmd_export(parser, context, args):
+    parser.description = ('Generate a description of a directory containing ' +
+                          'nested git repositories.')
+    add_arguments(parser, ARG_PATH, ARG_OUTPUT)
+    args = parser.parse_args(args)
+
+    repos, rootpath = get_repos(args)
+    output = {}
+    for reponame, repo in sorted(repos.items()):
+        output[reponame] = {
+            REMOTES: {
+                remote.name: list(remote.urls) for remote in repo.remotes
+            }
+        }
+
+    output_file_or_stdout(
+        args, output, lambda file, data: json.dump(data, file)
+    )
+
+
+@subcmd('import')
+def cmd_import(parser, context, args):
+    parser.description = 'Clone a git repo tree from a description file.'
+    add_arguments(parser, ARG_INPUT, ARG_OUTPATH, ARG_VERBOSE)
+    args = parser.parse_args(args)
+
+    input = input_file_or_stdin(args, lambda file: json.load(file))
+
+    for repo_name, repo_config in sorted(input.items()):
+        # determine the deflated path
+        try:
+            remotes = repo_config[REMOTES]
+            repo_path = os.path.abspath(os.path.join(args.output, repo_name))
+
+            # check if there is already a git repo in place. We do not check
+            # if it is actually pointing to the same reference
+            try:
+                repo = git.Repo(repo_path)
+                info('Skipping ''%s'' (exists already)' %(repo_path, ))
+                continue
+            except git.exc.InvalidGitRepositoryError:
+                pass
+            except git.exc.NoSuchPathError:
+                pass
+
+            # try retrieving a remote named 'origin'. If there's no such thing,
+            # take the first we could get a grip on that has at least one URL
+            remote = 'origin'
+            if remote not in remotes:
+                selection = {remote: urls
+                             for remote, urls in remotes.items()
+                             if len(urls) > 0}
+                remote = list(sorted(selection.keys()))[0]
+
+            urls = remotes.pop(remote)
+            url = urls.pop(0)
+
+            info('Cloning ''%s'' from %s to %s' %(
+                repo_name, url, repo_path
+            ))
+
+            # clone the repository, then add the remaining URLS of the first
+            # remote, afterwards add the other remotes (and their URLs)
+            if not os.path.exists(repo_path):
+                os.makedirs(repo_path)
+
+            kwargs = {}
+            if args.verbose:
+                kwargs['progress'] = Progress()
+
+            repo = git.Repo.clone_from(url, repo_path, **kwargs)
+
+            # iterate: remaining urls
+
+        except KeyError as e:
+            error(
+                'Unable to deflate ''%s'': %s'% (repo_name, repr(e))
+            )
+        except git.exc.GitCommandError as e:
+            error('Git Error: %s'% (repr(e), ))
+
+        if args.verbose:
+            clearline()
+
+
+@subcmd('list')
+def cmd_list(parser, context, args):
+    parser.description = 'List all git repos in the current or a given path.'
+    add_arguments(parser, ARG_PATH, ARG_OUTPUT)
+    args = parser.parse_args(args)
+
+    repos, rootpath = find_repos(args.path)
+    paths = [os.path.abspath(os.path.join(args.path, path))
+             for path in list(sorted(repos.keys()))]
+
+    def write_lines(file, lines):
+        for line in lines:
+            file.write(line + '\n')
+
+    output_file_or_stdout(args, paths, write_lines)
+
+
+@subcmd('ping')
+def cmd_ping(parser, context, args):
+    parser.description = 'Ping the remotes of all git repos and report issues.'
+    add_arguments(parser, ARG_PATH, ARG_LIST, ARG_VERBOSE)
+    args = parser.parse_args(args)
+
+    repos, rootpath = get_repos(args)
+
+    successful, failed = 0, 0
+    for repopath, repo in sorted(repos.items()):
+        for remote in repo.remotes:
+            for url in remote.urls:
+                try:
+                    # perform 'git ls-remote' to determineh remote refs
+                    # if that succeeds, we know there is a commection!
+                    remote_refs = {}
+                    g = git.cmd.Git()
+                    for ref in g.ls_remote(url).split('\n'):
+                        if len(ref):
+                            hash_refs = ref.split('\t')
+                            if len(hash_refs) > 1:
+                                remote_refs[hash_refs[1]] = hash_refs[0]
+
+                    if len(remote_refs) == 0:
+                        warning('%s:%s (%s) reports no refs.' %(
+                            repopath, remote, url
+                        ))
+                    elif args.verbose:
+                        info('%s:%s (%s) available.' %(repopath, remote, url))
+                    successful = successful + 1
+                except git.exc.GitCommandError:
+                    error('Could not read from remote ''%s'':%s (%s)'% (
+                        repopath, remote, url
+                    ))
+                    failed = failed + 1
+
+    info('Pinging %d of %d remotes successful.'% (
+        successful, successful + failed
+    ))
+
+
+@subcmd('status')
+def cmd_status(parser, context, args):
+    parser.description = 'Show status of all git repos.'
+    add_arguments(parser, ARG_PATH, ARG_LIST, ARG_VERBOSE)
+    args = parser.parse_args(args)
+
+    repos, rootpath = get_repos(args)
+
+    # now crawl the status of our repositories
+    for repopath, repo in sorted(repos.items()):
+        talked = False
+        try:
+            # determine some rough status
+            branch = repo.active_branch
+            untracked = len(repo.untracked_files)
+            status = '%s <%s> %s' %(
+                repopath, branch,
+                '(%d untracked files)' %(untracked) if untracked else ''
+            )
+            if len(repo.remotes) == 0:
+                talked = True
+                warning(status + ' has no remotes.')
+
+            if len(repo.active_branch.log()) == 0:
+                if args.verbose:
+                    talked = True
+                    info('%s has no commits yet' %(status, ))
+            else:
+                # check if behind any remote
+                for remote in repo.remotes:
+                    commits_behind = list(repo.iter_commits(
+                        '%s..%s/%s'% (branch, remote, branch)
+                    ))
+                    if len(commits_behind):
+                        talked = True
+                        warning('%s is behind of %s by %d commits' %(
+                            status, remote, len(commits_behind)
+                        ))
+
+                # check if ahead of any remote
+                for remote in repo.remotes:
+                    commits_ahead = list(repo.iter_commits(
+                        '%s/%s..%s'% (remote, branch, branch)
+                    ))
+                    if len(commits_ahead):
+                        talked = True
+                        warning('%s is ahead of %s by %d commits' %(
+                            status, remote, len(commits_ahead)
+                        ))
+
+            if repo.is_dirty():
+                talked = True
+                warning(status + ' contains uncommited stages (dirty)')
+
+            if args.verbose and repo.bare:
+                talked = True
+                info(status + ' is a bare repository')
+
+            if not talked:
+                if untracked > 0:
+                    warning(status)
+                elif args.verbose:
+                    info(status + ' OK.')
+
+        except git.exc.GitCommandError as e:
+            error('Error checking ''%s'': %s' %(repopath, repr(e)))
+
+
+@subcmd('fetch')
+def cmd_fetch(parser, context, args):
+    parser.description = 'Fetch changes in upstream from all git repos.'
+    add_arguments(parser, ARG_PATH, ARG_LIST, ARG_VERBOSE)
+    args = parser.parse_args(args)
+
+    repos, rootpath = get_repos(args)
+
+    for repopath, repo in sorted(repos.items()):
+        for remote in repo.remotes:
+            try:
+                info('Fetching from %s:%s'% (repopath, remote))
+
+                kwargs = {}
+                if args.verbose:
+                    kwargs['progress'] = Progress()
+
+                remote.fetch(**kwargs)
+            except git.exc.GitCommandError as e:
+                error('Error fetching from %s:%s: %s' %(
+                    repopath, remote, repr(e)
+                ))
+            if args.verbose:
+                clearline()
+
+
+@subcmd('pull')
+def cmd_pull(parser, context, args):
+    parser.description = 'Pull upstream of all git repos.'
+    parser.add_argument('--rebase', action='store_true',
+                        help='Use rebase instead of merge to apply upstream.')
+    add_arguments(parser, ARG_PATH, ARG_LIST, ARG_VERBOSE)
+    args = parser.parse_args(args)
+
+    repos, rootpath = get_repos(args)
+
+    for repopath, repo in sorted(repos.items()):
+        for remote in repo.remotes:
+            try:
+                info('Pulling%s from %s:%s'% (
+                    ' (--rebase)' if args.rebase else '', repopath, remote
+                ))
+
+                kwargs = {}
+                if args.verbose:
+                    kwargs['progress'] = Progress()
+
+                remote.pull(*(["--rebase"] if args.rebase else []), **kwargs)
+            except git.exc.GitCommandError as e:
+                error('Error pulling from %s:%s: %s' %(
+                    repopath, remote, repr(e)
+                ))
+            if args.verbose:
+                clearline()
+
+
+@subcmd('archive')
+def cmd_archive(parser, context, args):
+    parser.description = 'Archive all git repositories.'
+    parser.add_argument('--sep', default='__',
+                        help='Token separator for archive name composition.')
+    parser.add_argument('--format', default='gztar',
+                        help=('Archive output format. Choose from: ' +
+                              'tar, gztar, bztar, xztar, zip'))
+    parser.add_argument('--no-timestamp', action='store_true',
+                        help='Do not include timestamps in archive filename.')
+    add_arguments(parser, ARG_PATH, ARG_LIST, ARG_VERBOSE, ARG_OUTPATH)
+    args = parser.parse_args(args)
+
+    repos, rootpath = get_repos(args)
+
+    import shutil
+    import time
+
+    # create output path if not existant
+    if not os.path.exists(args.output):
+        os.makedirs(args.output)
+
+    # iterate the repositories
+    for repopath, repo in sorted(repos.items()):
+        try:
+            # determine all directory levels in repopath
+            path = (repopath, )
+            levels = []
+            while sum(len(s) for s in path):
+                if len(path) > 1:
+                    levels.insert(0, path[1])
+                path = os.path.split(path[0])
+
+            # if not explicitly disabled, add a timestamp to the beginning
+            if not args.no_timestamp:
+                curr_time = time.localtime()
+                levels.insert(0, time.strftime('%H-%M-%S', curr_time))
+                levels.insert(0, time.strftime('%Y-%m-%d', curr_time))
+
+            # complete filename and write the archive
+            archive_basename = os.path.join(args.output, args.sep.join(levels))
+            info('Archiving %s to %s'% (repopath, archive_basename))
+            shutil.make_archive(
+                archive_basename,
+                args.format,
+                rootpath,
+                repopath
+            )
+        except FileNotFoundError as e:
+            error(repr(e))
+        except OSError as e:
+            error(repr(e))
+
+
+@subcmd('version')
+def cmd_version(parser, context, args):
+    info('PINGIT Version ' + __version__)
+    info('PINGIT Is Not a Git Indexing Tool')
+    info('(2019) EMS Research Group TU Ilmenau, ' +
+         'http://github.com/EMS-TU-Ilmenau/PINGIT, ' +
+         'https://www.tu-ilmenau.de/it-ems')
+
+
+if __name__ == '__main__':
+    handler = ArgumentHandler()
+    handler.description = 'PINGIT is Not a Git Indexing Tool'
+    handler.set_logging_argument('--logging', default_level=logging.INFO)
+    handler.run(sys.argv[1:])
