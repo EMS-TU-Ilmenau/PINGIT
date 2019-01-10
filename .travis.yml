@@ -42,7 +42,7 @@ deploy:
   distributions: sdist bdist_wheel
   tags: true
   on:
-    branch: stable
+    branch: master
     python: 3.7
   user:
     secure: qFZdH/zNP5NPag/dIrMDQFHpCec/bQWqPesBtyjtGVrmPvvu4NLmfDmYW1Rrfl2Gy/cP40XfXXp/uz8oxtBKEMXn6k3iR2XS0agqSY4/HJQT1iEbGyXF0+kGdS6Stsx8B93SYIsU4kuq6rXJZ+kY2g4QVqKo17nWk7qrHRJsumaCY1VeBeseHgSXyleTC6FVPGYDgl05oXWqwfHLOu8VYDUJXc7kiXZyRtwbFmVVfOtgN/Ay/vWxGmRl2bTDQUoDMPJ8ISWekwbwZ57+WtVT/nnIXiulLZcquNAqPFXZ2SZqhPSzuzZ/26azbKwdAxmFrG1d/XyoCxZDMTlOvnN2ajpTZ9wQZTqN9JrU1iJVgpoqBs4IDseKutJNeSUIUk1mI4uHtMMBhpjGtKRIl9rRH0lb47DLaxb2/XiwmtExFbfw6vbmT1F+XMV7xT0mPs+9eMfwzq7RaNbcEDo09qW0jbIKxocr1ckap8FZxTyrjZGbzTqzXkgMsGty77H+52X06JXhpD0Uqm83s/3Ssycic5WwCpb4PRNwNgpT7nKWYzdJ6T1R6jKYqmERiUhDWW8Hd856C6yewwA8vshW2YYs+3mPw3A52jyLNOLGvBzYkJlNmK+O1H+FIjFtkjK8OtiQO0ILsuGHX9wUJjf7he0g/uHF5hd1armmJ87RHCpIpaM=
