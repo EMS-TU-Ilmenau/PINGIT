@@ -76,7 +76,6 @@ forget to publish by pushing them. `pingit status` also reports this case.
 However, please note that the presence of `.gitignore`-d files will not be
 reported.
 
-    ```
     nutzer@dev:~/Git/github$ pingit status
     WARNING:root:No git repositories found in ~/Git/github/foo-data
     WARNING:root:PINGIT <master> (1 untracked files) contains uncommited stages (dirty)
@@ -84,16 +83,17 @@ reported.
     WARNING:root:fastmat <circulant-merge>  is ahead of origin by 1 commits
     WARNING:root:fastmat <circulant-merge>  contains uncommited stages (dirty)
     nutzer@dev:~/Git/github$
-    ```
+
 
 NOTE: Currently, PINGIT only warns about non-git-related directories and
       ignores stray files outside of git repositories but inside the git
       collection container.
 
+
 NOTE: Repositories that are up-to-date and require no attention do not produce
       console output unless the `--verbose` option is provided. In the above
       case the output with `--verbose` would be:
-    ```
+
     nutzer@dev:~/Git/github$ pingit status -v
     WARNING:root:No git repositories found in ~/Git/github/foo-data
     INFO:root:EuroSciPy2018 <master>  OK.
@@ -103,7 +103,7 @@ NOTE: Repositories that are up-to-date and require no attention do not produce
     WARNING:root:fastmat <circulant-merge>  is ahead of origin by 1 commits
     WARNING:root:fastmat <circulant-merge>  contains uncommited stages (dirty)
     nutzer@dev:~/Git/github$
-    ```
+
 
 ## Assisting the backup process of your git repositories
 
@@ -123,7 +123,6 @@ allows you to selectively roll back single repositories.
 By default a timestamp will be added included into the archive filename, but
 you may choose to disable this behaviour with the `--no-timestamp` option.
 
-    ```
     nutzer@dev:~/Git/github$ pingit archive -o ~/backup
     WARNING:root:No git repositories found in ~/Git/github/foo-data
     INFO:root:Archiving EuroSciPy2018 to ~/backup/2019-01-10__18-15-28__EuroSciPy2018
@@ -139,7 +138,7 @@ you may choose to disable this behaviour with the `--no-timestamp` option.
     280K 2019-01-10__18-16-05__chefkoch.tar.gz
     116M 2019-01-10__18-16-06__fastmat.tar.gz
     nutzer@dev:~/Git/github$
-    ```
+
 
 ## Migrating your git collection to a new machine
 Hauling git repositories is either copying your local git collection container
@@ -151,12 +150,10 @@ An alternative poses the combination of `pingit export` / `pingit import`, that
 exports your local git collection to a description file which can be shared,
 moved or copied for rebuilding it somewhere else:
 
-     ```
      alice@foo:~/Git/github$ pingit import -i desc.json
      alice@foo:~/Git/github$
-     ```
 
-     ```
+
      bob@bar:/tmp$ pingit import -i desc.json
      INFO:root:Cloning EuroSciPy2018 from https://github.com/ChristophWWagner/python-modelling to /tmp/EuroSciPy2018
      INFO:root:Cloning HX3 from https://github.com/keyboardpartner/HX3 to /tmp/HX3
@@ -164,17 +161,16 @@ moved or copied for rebuilding it somewhere else:
      INFO:root:Cloning chefkoch from http://github.com/EMS-TU-Ilmenau/chefkoch to /tmp/chefkoch
      INFO:root:Cloning fastmat from https://github.com/EMS-TU-Ilmenau/fastmat.git to /tmp/fastmat
      nutzer@dev:/tmp$
-     ```
+
 
 With some shell-plumbing this can also be achieved in a one-liner to retrieve
 a clean checkout of your git collection in one flush:
 
-     ```
-     nutzer@dev:~/Git/github$ pingit export | pingit import -o /tmp/clean
-     ```
+      nutzer@dev:~/Git/github$ pingit export | pingit import -o /tmp/clean
 
 NOTE: Currently, only multiple remote specifications are preserved and not the
       full local repository configuration.
+
 
 ## Finding dead remotes
 When your repository server moves you often end up with git remotes pointing
@@ -185,19 +181,17 @@ unresponsive remote will be reported and can be adjusted manually using `git`.
 In cases where you can define a regular expression pattern to resolve the issue
 you can migrate all your remotes at once by combining `pingit` and `sed`:
 
-    ```
     pingit export | sed -e 's_oldserver.somewhere.xyz_newserver.somewhere.abc_g' | pingit import -o new_location
-    ```
 
 NOTE: This provides you with a clean clone into `new_location` and might
       result in the loss of special git repository configuration
+
 
 ## Update your complete git collection in one flush
 If you work on multiple machines you might encounter the case where you sit
 before a git repository collection that has not been updated in a while.
 Batch-fetching or Batch-pulling can be achieved easily with PINGIT:
 
-    ```
     nutzer@dev:~/Git/github$ pingit fetch
     INFO:root:Fetching from EuroSciPy2018:origin
     INFO:root:Fetching from HX3:origin origin/master
@@ -205,14 +199,13 @@ Batch-fetching or Batch-pulling can be achieved easily with PINGIT:
     INFO:root:Fetching from chefkoch:originin/master
     INFO:root:Fetching from fastmat:origin       -> origin/stable
     nutzer@dev:~/Git/github$
-    ```
+
 
 Alternatively, you may choose to pull or rebase-pull directly:
 
-    ```
     nutzer@dev:~/Git/github$ pingit pull
     nutzer@dev:~/Git/github$ pingit pull --rebase
-    ```
+
 
 NOTE: If pulling fails this will be expressed with an error. Currently, you
       need to manually resolve the issue using git.
@@ -224,19 +217,18 @@ not related to any existing git functionaliy.
 
 The common usage is:
 
-    ```
     $ pingit <subcommand> <arguments>
-    ```
+
 
 For detailed description of any subcommands exact synctax please refer to the
 command line help, which is available via
 
-    ```
     $ pingit <subcommand> -h
-    ```
+
 
 The following general command line switches are available for most if not all
 subcommands:
+|    | Option    | Description                                              |
 |----|-----------|----------------------------------------------------------|
 | -p | --path    | Use different base path than current directory.          |
 | -i | --input   | Read input from file instead of reading from STDIN.      |
@@ -319,6 +311,7 @@ same sequence will also be used to separate the timestamps, if activated.
 Accepts the `--path`, `--list`, `--output` and `--verbose` command line options
 as defined above. Also accepts the following options:
 
+| Option         | Description                                    |
 |----------------|------------------------------------------------|
 | --sep          | Token separator for archive name composition.  |
 | --format       | Archive output format.                         |
