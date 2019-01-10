@@ -1,13 +1,13 @@
 
 
-# PINGIT -- batch management tool for multiple nested git repositories [![Build Status](https://www.travis-ci.org/EMS-TU-Ilmenau/PINGIT.svg?branch=master)](https://www.travis-ci.org/EMS-TU-Ilmenau/PINGIT) [![Version](https://img.shields.io/pypi/v/PINGIT.svg)](https://pypi.python.org/pypi/PINGIT)
-
+# Welcome to PINGIT [![Build Status](https://www.travis-ci.org/EMS-TU-Ilmenau/PINGIT.svg?branch=master)](https://www.travis-ci.org/EMS-TU-Ilmenau/PINGIT) [![Version](https://img.shields.io/pypi/v/PINGIT.svg)](https://pypi.python.org/pypi/PINGIT)
+## A batch management tool for multiple nested git repositories
 [![License](https://img.shields.io/pypi/l/PINGIT.svg)](https://pypi.python.org/pypi/PINGIT) [![Python versions](https://img.shields.io/pypi/pyversions/PINGIT.svg)](https://pypi.python.org/pypi/PINGIT) [![Implementation](https://img.shields.io/pypi/implementation/PINGIT.svg)](https://pypi.python.org/pypi/PINGIT) [![Status](https://img.shields.io/pypi/status/PINGIT.svg)](https://pypi.python.org/pypi/PINGIT)
 
 PINGIT is not a git indexing tool. Instead it offers a command-line interface
 for managing multiple git repositories nested in a hierarchic directory structure.
 
-## Description
+# Description
 PINGIT generates an index of all git repositories and their directory
 structure of the current working directory and works with it.
 
@@ -21,7 +21,7 @@ Currently PINGIT supports:
 Pingit is written in Python and supports Python2 and Python3 since
 Python 2.7+
 
-## Motivation
+# Motivation
 If you happen to use git intensively for a wide range of projects you sooner or
 later find yourself having the need to comfortably deal with a large number of
 git repositories, often embedded into an more-or-less hierarchical directory
@@ -37,7 +37,7 @@ where PINGIT could be of help but is currently lacking a feature or two (issue
 section or pull request) . Any help, feedback or contribution is happily
 appreciated. Thank you!
 
-### A few words on git repository organization
+## A few words on git repository organization
 Based on the fact that the common git repository services (github, gitlab, ...)
 are organized hierarchically it is a common pattern that clones repositories
 often reflect this hierarchy to some degree. You may easily find yourself
@@ -53,7 +53,7 @@ Following some of the (quite often annoying) tasks are presented that in the
 past required repetitive manual work to resolve, that ultimatively resulted in
 the creation of PINGIT. Each task comes with a usage example.
 
-### Is there unpublished or git-unrelated stuff in my git collection?
+## Is there unpublished or git-unrelated stuff in my git collection?
 Each successful backup scheme relies on scrupulous checking of violations --
 that in the worst case may lead to data loss in case of a failure requiring the
 fall-back of one of the backups.
@@ -76,17 +76,15 @@ forget to publish by pushing them. `pingit status` also reports this case.
 However, please note that the presence of `.gitignore`-d files will not be
 reported.
 
-Example:
---------
-  ```
-  nutzer@dev:~/Git/github$ pingit status
-  WARNING:root:No git repositories found in ~/Git/github/foo-data
-  WARNING:root:PINGIT <master> (1 untracked files) contains uncommited stages (dirty)
-  WARNING:root:chefkoch <master>  contains uncommited stages (dirty)
-  WARNING:root:fastmat <circulant-merge>  is ahead of origin by 1 commits
-  WARNING:root:fastmat <circulant-merge>  contains uncommited stages (dirty)
-  nutzer@dev:~/Git/github$
-  ```
+    ```
+    nutzer@dev:~/Git/github$ pingit status
+    WARNING:root:No git repositories found in ~/Git/github/foo-data
+    WARNING:root:PINGIT <master> (1 untracked files) contains uncommited stages (dirty)
+    WARNING:root:chefkoch <master>  contains uncommited stages (dirty)
+    WARNING:root:fastmat <circulant-merge>  is ahead of origin by 1 commits
+    WARNING:root:fastmat <circulant-merge>  contains uncommited stages (dirty)
+    nutzer@dev:~/Git/github$
+    ```
 
 NOTE: Currently, PINGIT only warns about non-git-related directories and
       ignores stray files outside of git repositories but inside the git
@@ -95,21 +93,22 @@ NOTE: Currently, PINGIT only warns about non-git-related directories and
 NOTE: Repositories that are up-to-date and require no attention do not produce
       console output unless the `--verbose` option is provided. In the above
       case the output with `--verbose` would be:
-  ```
-  nutzer@dev:~/Git/github$ pingit status -v
-  WARNING:root:No git repositories found in ~/Git/github/foo-data
-  INFO:root:EuroSciPy2018 <master>  OK.
-  INFO:root:HX3 <master>  OK.
-  WARNING:root:PINGIT <master> (1 untracked files) contains uncommited stages (dirty)
-  WARNING:root:chefkoch <master>  contains uncommited stages (dirty)
-  WARNING:root:fastmat <circulant-merge>  is ahead of origin by 1 commits
-  WARNING:root:fastmat <circulant-merge>  contains uncommited stages (dirty)
-  nutzer@dev:~/Git/github$
-  ```
+    ```
+    nutzer@dev:~/Git/github$ pingit status -v
+    WARNING:root:No git repositories found in ~/Git/github/foo-data
+    INFO:root:EuroSciPy2018 <master>  OK.
+    INFO:root:HX3 <master>  OK.
+    WARNING:root:PINGIT <master> (1 untracked files) contains uncommited stages (dirty)
+    WARNING:root:chefkoch <master>  contains uncommited stages (dirty)
+    WARNING:root:fastmat <circulant-merge>  is ahead of origin by 1 commits
+    WARNING:root:fastmat <circulant-merge>  contains uncommited stages (dirty)
+    nutzer@dev:~/Git/github$
+    ```
 
-### Assisting the backup process of your git repositories
-  *Backups are like insurances -- you hope you never need it, but if you do,
-  you are happy if you're fully covered.*
+## Assisting the backup process of your git repositories
+
+    *Backups are like insurances -- you hope you never need it, but if you do,
+    you are happy if you're fully covered.*
 
 Following that common phrase it is of good practice to automate the backup
 process as much as possible, always following the other phrase: *better safe
@@ -124,27 +123,25 @@ allows you to selectively roll back single repositories.
 By default a timestamp will be added included into the archive filename, but
 you may choose to disable this behaviour with the `--no-timestamp` option.
 
-Example:
---------
-  ```
-  nutzer@dev:~/Git/github$ pingit archive -o ~/backup
-  WARNING:root:No git repositories found in ~/Git/github/foo-data
-  INFO:root:Archiving EuroSciPy2018 to ~/backup/2019-01-10__18-15-28__EuroSciPy2018
-  INFO:root:Archiving HX3 to ~/backup/2019-01-10__18-15-28__HX3
-  INFO:root:Archiving PINGIT to ~/backup/2019-01-10__18-16-04__PINGIT
-  INFO:root:Archiving chefkoch to ~/backup/2019-01-10__18-16-05__chefkoch
-  INFO:root:Archiving fastmat to ~/backup/2019-01-10__18-16-06__fastmat
-  nutzer@dev:~/Git/github$ ls -sh1 ~/backup
-  insgesamt 471M
-   20K 2019-01-10__18-15-28__EuroSciPy2018.tar.gz
-  355M 2019-01-10__18-15-28__HX3.tar.gz
-   64K 2019-01-10__18-16-04__PINGIT.tar.gz
-  280K 2019-01-10__18-16-05__chefkoch.tar.gz
-  116M 2019-01-10__18-16-06__fastmat.tar.gz
-  nutzer@dev:~/Git/github$
-  ```
+    ```
+    nutzer@dev:~/Git/github$ pingit archive -o ~/backup
+    WARNING:root:No git repositories found in ~/Git/github/foo-data
+    INFO:root:Archiving EuroSciPy2018 to ~/backup/2019-01-10__18-15-28__EuroSciPy2018
+    INFO:root:Archiving HX3 to ~/backup/2019-01-10__18-15-28__HX3
+    INFO:root:Archiving PINGIT to ~/backup/2019-01-10__18-16-04__PINGIT
+    INFO:root:Archiving chefkoch to ~/backup/2019-01-10__18-16-05__chefkoch
+    INFO:root:Archiving fastmat to ~/backup/2019-01-10__18-16-06__fastmat
+    nutzer@dev:~/Git/github$ ls -sh1 ~/backup
+    insgesamt 471M
+     20K 2019-01-10__18-15-28__EuroSciPy2018.tar.gz
+    355M 2019-01-10__18-15-28__HX3.tar.gz
+     64K 2019-01-10__18-16-04__PINGIT.tar.gz
+    280K 2019-01-10__18-16-05__chefkoch.tar.gz
+    116M 2019-01-10__18-16-06__fastmat.tar.gz
+    nutzer@dev:~/Git/github$
+    ```
 
-### Migrating your git collection to a new machine
+## Migrating your git collection to a new machine
 Hauling git repositories is either copying your local git collection container
 directory to another location or even another machine (including all build
 leftovers or dirty states) or resembling the structure of your local git
@@ -171,6 +168,7 @@ moved or copied for rebuilding it somewhere else:
 
 With some shell-plumbing this can also be achieved in a one-liner to retrieve
 a clean checkout of your git collection in one flush:
+
      ```
      nutzer@dev:~/Git/github$ pingit export | pingit import -o /tmp/clean
      ```
@@ -178,7 +176,7 @@ a clean checkout of your git collection in one flush:
 NOTE: Currently, only multiple remote specifications are preserved and not the
       full local repository configuration.
 
-### Finding dead remotes
+## Finding dead remotes
 When your repository server moves you often end up with git remotes pointing
 to unavailable locations. You may identify such situation using `pingit ping`,
 can be thought of as a kind of batch-`git ls-remote`. Every remote that could
@@ -186,17 +184,19 @@ unresponsive remote will be reported and can be adjusted manually using `git`.
 
 In cases where you can define a regular expression pattern to resolve the issue
 you can migrate all your remotes at once by combining `pingit` and `sed`:
-  ```
-  pingit export | sed -e 's_oldserver.somewhere.xyz_newserver.somewhere.abc_g' | pingit import -o new_location
-  ``
+
+    ```
+    pingit export | sed -e 's_oldserver.somewhere.xyz_newserver.somewhere.abc_g' | pingit import -o new_location
+    ```
 
 NOTE: This provides you with a clean clone into `new_location` and might
       result in the loss of special git repository configuration
 
-### Update your complete git collection in one flush
+## Update your complete git collection in one flush
 If you work on multiple machines you might encounter the case where you sit
 before a git repository collection that has not been updated in a while.
 Batch-fetching or Batch-pulling can be achieved easily with PINGIT:
+
     ```
     nutzer@dev:~/Git/github$ pingit fetch
     INFO:root:Fetching from EuroSciPy2018:origin
@@ -208,29 +208,32 @@ Batch-fetching or Batch-pulling can be achieved easily with PINGIT:
     ```
 
 Alternatively, you may choose to pull or rebase-pull directly:
+
     ```
     nutzer@dev:~/Git/github$ pingit pull
-    ```
-    ```
     nutzer@dev:~/Git/github$ pingit pull --rebase
     ```
 
 NOTE: If pulling fails this will be expressed with an error. Currently, you
       need to manually resolve the issue using git.
 
-## Usage
+# Usage
 PINGIT applies a subcommand architecture, quite comparable to git. Many
 subcommands match those already known from git, although some exist that are
 not related to any existing git functionaliy.
 
 The common usage is:
 
-    `$ pingit <subcommand> <arguments>`
+    ```
+    $ pingit <subcommand> <arguments>
+    ```
 
 For detailed description of any subcommands exact synctax please refer to the
 command line help, which is available via
 
-    `$ pingit <subcommand> -h`
+    ```
+    $ pingit <subcommand> -h
+    ```
 
 The following general command line switches are available for most if not all
 subcommands:
