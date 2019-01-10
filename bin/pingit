@@ -449,7 +449,7 @@ if __name__ == '__main__':
                     talked = True
                     warning(status + ' has no remotes.')
 
-                if branch != DETACHED or len(repo.active_branch.log()) == 0:
+                if branch == DETACHED or len(repo.active_branch.log()) == 0:
                     if args.verbose:
                         talked = True
                         info('%s has no commits yet' %(status, ))
