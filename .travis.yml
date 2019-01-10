@@ -26,15 +26,15 @@ install:
 script:
 - pip install .
 - pingit list
-- pingit export
-- pingit export -o structure.json
-- pingit import -i structure.json -o import
-- pingit fetch
-- pingit pull --rebase
-- pingit status
-- pingit archive -o backup
-- pingit archive -o backup --no-timestamp
-- pingit archive -o backup --format zip
+- pingit export -p ..
+- pingit export -p .. -o ../structure.json
+- pingit import -p .. -i ../structure.json -o ../import
+- pingit fetch -p ..
+- pingit pull --rebase -p ..
+- pingit status -p ..
+- pingit archive -p .. -o ../backup
+- pingit archive -p .. -o ../backup --no-timestamp
+- pingit archive -p .. -o ../backup --format zip
 - ll */*
 deploy:
   provider: pypi

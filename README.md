@@ -228,6 +228,7 @@ command line help, which is available via
 
 The following general command line switches are available for most if not all
 subcommands:
+
 |    | Option    | Description                                              |
 |----|-----------|----------------------------------------------------------|
 | -p | --path    | Use different base path than current directory.          |
