@@ -238,13 +238,12 @@ subcommands:
 | -l | --list    | Instead of a recursive search for repos, take this list. |
 | -v | --verbose | Increase verbosity of output. (Also report infos)        |
 |    | --logging | Choose output verbosity level. (silence output a bit)    |
-|----|-----------|----------------------------------------------------------|
 
 You may choose <subcommand> from the list composed of the following subsection
 titles:
 
 ## export
-Generate a description of a directory containing nested git repositories.
+**Generate a description of a directory containing nested git repositories.**
 The resulting directory structure description originates at the given base path
 and is formatted as json file. Use `import` to reproduce the repository
 structure from this description.
@@ -252,34 +251,36 @@ structure from this description.
 Accepts the `--path` and `--output` command line options as defined above.
 
 ## import
-Clone a git repo tree from a description file (as produced by `export`).
+**Clone a git repo tree from a description file (as produced by `export`).**
 
 Accepts the `--path`, `--input` and `--verbose` command line options as defined
 above.
 
 ## list
-List all git repos in the current or a given path.
+**List all git repos in the current or a given path.**
 You may use the produced list (either as-is or reduced afterwards) to control
 the repository selection the following commands are applied to.
 
 Accepts the `--path` and `--output` command line options as defined above.
 
 ## ping
-Ping the remotes of all git repos and report issues. All urls for all remotes
-of the (selected) git repositories will be tried using `git ls-remote`.
+**Ping the remotes of all git repos and report issues.**
+All urls for all remotes of the (selected) git repositories will be tried
+using `git ls-remote`.
 
 Accepts the `--path`, `--list` and `--verbose` command line options as defined
 above.
 
 ## fetch
-Fetch changes in upstream from all git repos.
+**Fetch changes in upstream from all git repos.**
 
 Accepts the `--path`, `--list` and `--verbose` command line options as defined
 above.
 
 ## status
-Show status of all git repos. Tthe following conditions will be tested for all
-remotes of all (selected) git repositories:
+**Show status of all git repos.**
+The following conditions will be tested for all remotes of all (selected) git
+repositories:
  * what is the active branch?
  * Are there untracked files?
  * Are there uncommitted changes?
@@ -291,7 +292,7 @@ Accepts the `--path`, `--list` and `--verbose` command line options as defined
 above.
 
 ## pull
-Pull upstream of all git repos.
+**Pull upstream of all git repos.**
 
 Accepts the `--path`, `--list` and `--verbose` command line options as defined
 above. Further, you may select to apply the rebase strategy with the `--rebase`
@@ -299,15 +300,16 @@ command line option instead of the default strategy (merge or as set in the
 repository configuration).
 
 ## archive
-Archive all git repositories. Each of the (selected) git repositories will be
-packed into an archive format of your choice and written to the current working
-directory or the path specified by `--output`. The filename will by default be
-composed from a timestamp (YYYY-MM-DD and HH-MM-SS) and the pathspec of the
-repository relative to the selected basepath (current working directory or
-`--path` option). However, you may decide to skip the timestamp if you like.
-Path delimiters in the relative path portion of the filename will be replaced
-by the separation character sequence given in `--sep` (defaults to `__`). The
-same sequence will also be used to separate the timestamps, if activated.
+**Archive all git repositories.**
+Each of the (selected) git repositories will be packed into an archive format
+of your choice and written to the current working directory or the path
+specified by `--output`. The filename will by default be composed from a
+timestamp (YYYY-MM-DD and HH-MM-SS) and the pathspec of the repository relative
+to the selected basepath (current working directory or `--path` option).
+However, you may decide to skip the timestamp if you like. Path delimiters in
+the relative path portion of the filename will be replaced by the separation
+character sequence given in `--sep` (defaults to `__`). The same sequence will
+also be used to separate the timestamps, if activated.
 
 Accepts the `--path`, `--list`, `--output` and `--verbose` command line options
 as defined above. Also accepts the following options:
@@ -317,7 +319,6 @@ as defined above. Also accepts the following options:
 | --sep          | Token separator for archive name composition.  |
 | --format       | Archive output format.                         |
 | --no-timestamp | Do not include timestamps in archive filename. |
-|----------------|------------------------------------------------|
 
 ## version
 Report the version of the PINGIT.
