@@ -32,7 +32,7 @@
 #  Author: Christoph Wagner, 04.01.2019, EMS Research Group TU Ilmenau
 #
 
-__version__ = 0.1
+__version__ = 0.1a0
 
 if __name__ == '__main__':
     import sys
