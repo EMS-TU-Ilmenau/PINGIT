@@ -21,7 +21,17 @@ Currently PINGIT supports:
 Pingit is written in Python and supports Python2 and Python3 since
 Python 2.7+
 
-# Motivation
+## Installation
+PINGIT can be installed simply by running `pip install pingit` from your
+favorite python-powered Linux/*nix/Windows shell. It comes with no importable
+package but a command-line tool
+
+## Dependencies
+- gitpython
+- arghandler
+
+
+# Motivation, Usage and Examples
 If you happen to use git intensively for a wide range of projects you sooner or
 later find yourself having the need to comfortably deal with a large number of
 git repositories, often embedded into an more-or-less hierarchical directory
@@ -150,7 +160,7 @@ An alternative poses the combination of `pingit export` / `pingit import`, that
 exports your local git collection to a description file which can be shared,
 moved or copied for rebuilding it somewhere else:
 
-     alice@foo:~/Git/github$ pingit import -i desc.json
+     alice@foo:~/Git/github$ pingit export -i desc.json
      alice@foo:~/Git/github$
 
 
@@ -160,7 +170,7 @@ moved or copied for rebuilding it somewhere else:
      INFO:root:Cloning PINGIT from https://github.com/EMS-TU-Ilmenau/PINGIT.git to /tmp/PINGIT
      INFO:root:Cloning chefkoch from http://github.com/EMS-TU-Ilmenau/chefkoch to /tmp/chefkoch
      INFO:root:Cloning fastmat from https://github.com/EMS-TU-Ilmenau/fastmat.git to /tmp/fastmat
-     nutzer@dev:/tmp$
+     bob@bar:/tmp$
 
 
 With some shell-plumbing this can also be achieved in a one-liner to retrieve
@@ -322,15 +332,6 @@ as defined above. Also accepts the following options:
 
 ## version
 Report the version of the PINGIT.
-
-# Installation
-PINGIT can be installed simply by running `pip install pingit` from your
-favorite python-powered Linux/*nix/Windows shell. It comes with no importable
-package but a command-line tool
-
-## Dependencies
-- gitpython
-- arghandler
 
 # Contributing
 Please feel free to fork this repository and feed back your changes via
