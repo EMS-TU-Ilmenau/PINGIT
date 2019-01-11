@@ -35,7 +35,7 @@ script:
 - pingit archive -p .. -o ../backup
 - pingit archive -p .. -o ../backup --no-timestamp
 - pingit archive -p .. -o ../backup --format zip
-- ls -l ../*/*/*
+- ls -l ../* ../*/* ../*/*/*
 deploy:
   provider: pypi
   skip_existing: true
@@ -47,4 +47,4 @@ deploy:
   user:
     secure: ZYzRZ8W9Fdahe4qRCVuenizbT41/0WQv2cGZ+6IqWp5DgJF+1yJXtIH/BPS8Q/PoifhPgImRe2PbkwIKGtfhOlIN0lVlYPHvI3r4y6AdIi5f1ZIPTG9MbOeUdcKegwqnNRGbcbiyy0U/AJsJ6YzBRmpKCqbSXX2SscyvMr+BBkq6+VubiK2xIYUHtk9Qz8QPoPx8w01tL7qvfcrlBaLKDqRZvu3Uy1rjOaKdXiwcnHJKvUXxtOfDgQDaUqPFYC+9H3UGKNg5gc/TGN8n9p9bLSVhRLkfjcicw0NNUpzCB9RlIts2FxCvRcLJ5+iX2w/kqBW0iDUpKY0US/F22aP1jJ1uI5A7YVSLmzi8ULfQ75OMEUiYgY9ZVLWIdy2seCsNncQPj3an7pLLQZdzsGwLRdozORws0MD8CJSg1xoj4/rMxhsbSXdxuIvXSaTiVOeCxt77/N/WpZoRR8/RT6ep7nNRIUCnejI5sSz9mX4Z2Pl9pW9//JeRAQ+3RQ9C0avjYsuPZlBwcH+uW9PprMCSWFN4hW1MFVsq9TRFnrM7IaMUe+hBp4QVAOfmBYSeaZQoL7ri57C6SSIxgz7/7Rb5kvO4hjS+BxODBFvbyKlOVFXUKQm5LNlgZyU9eyKczvl34UcnEkvMKXmETiA2bwRVILWk4SzPKRqJg1uUPJ+IrmY=
   password:
-    secure: 0PwPhwUfBdQIjgIP0r8gaJ4eVBIsb3KtajozB6ObLsIgwD4RFb0yBTg4J9MCGEy62qTq6t5ziBXl1wD0pXWXbqvi1e44pVfXXW2ZBSdJME3dAXXtZkise+CN6UmqpmnFXxt6/GF0N0xlStnZucasvbIOy9qxY5UXoNCDqdZJL7dJaakc8qbf8jKOychXqQKyT3nG8iAxyF99wPVP9R3VYg8ihfJ4BhZDNykd8gn6CHnSJ5gebXKFp2oIUP05GAEGjYrEarRml9uH8bTwWyc1K+1vwlrjoPUW8e+QvOJkZNCvAEv5ybdI6b3nSYkxzEU5UDLXofdjC8e6LgACITdKiACmoTwIG/lGIJ4exrvbsFdonuUeGPSPoEzMU1dlXY3ipc9nrmHUox1rV8e0X9YNBliqkqLdnffMrJw5GilAo4RF/UpBGXW/2mCePrP3ueoXrvuNRlwZokIdegQJubIPi23VExpgWjWdRToYENhO0+Ip0sLovBIhgGn/1FAsABuC0XvhXXrbWDlRjqDE4X3a701V+/+c5UqxtMLV4jnOZuJc4PGEGvztg3JdYy8DhaIEFENT3vN3FlKrB7uxQuEwF4F76NmTU0lJOduew2TdhM15aSJFWZ0P/JncAGC+xVWYe1XQApmWnUhUankngqLJfdwifWe1A+Le+ipw6Auixiw=
+    secure: f1gaetvUkeRXD05s6ORGkWfgVIcByYHPu/0Ql7O4reKdw/Yq03Icy8KZ0NibzDixEvVgE+EwhIA4gB2fNbq1cj9pzgVKd6mOZuCqxqFa3xTPFU/+Di5Q5TFEbvnV5mYXC01p6Bb3MLn4m8xPj9lU10UIUK48HnPTSKKbR4EnDjEu9kFxytFc81VPwyO7tLYtowqb1rmdpUWBksrVz2kVTdX1OY96sHWhlx2+ID4GLl/Umv7IqqcTFKHXkXEPiM+z+gowSf7MOK4Zu6v5MJzd0dCxDTz2DwlbPCNu2Lf+cK6o3aTLPUBiqv40Igu6Zy6pjf1gG54KQYzdRCOPlsCq9lcjgw9VHiXtv3kAWHgmqX61p3EepzFG4m7/xJNqQ/VEGytw3rjZft+GFXHKXhYeIgVWPkVS6PnEpsY1Hw8S5OR38CAuAKtwVy26lnmWa+nrZGRDIwQosxnxTkyHd0odn2WbBXowNhlFT0YiBgReHU2RitkAXb7Y4x/pYcqn2DECVDEIQu/RXb2sJYY4PACyvgODwRqB1mRdHO1vl56m7zroQKFkh20+iE+wOCgALm/EMYGjraz+pemreRYOl8o+87aCarAWUPKUEKX9bMmDCicLrHb41xjm2IJozxFcvAy3Naso//D/oTapGpbn0HZpcZckmZJAMMOkkh3Jmdl6mc8=
