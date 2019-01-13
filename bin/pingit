@@ -32,7 +32,7 @@
 #  Author: Christoph Wagner, 04.01.2019, EMS Research Group TU Ilmenau
 #
 
-__version__ = '0.1a0'
+__version__ = '0.1a1'
 
 if __name__ == '__main__':
     import sys
@@ -146,40 +146,51 @@ if __name__ == '__main__':
             value. The norepo list informs about subdirectories in path that do
             not contain any nested git repositories.
             """
+            # check if path itself is a valid repository
             repos = {}
-            norepo = []
-            has_repo = False
-
-            # get subdirectories of current path only
-            # (a lot faster than listdir())
-            for _, subdirs, _ in os.walk(path):
-                break
-
-            subdirs = map(lambda name: os.path.join(path, name), subdirs)
-
-            # crawl subdirectories
-            for subdir in subdirs:
-                if add_repo(subdir, rootpath, repos):
-                    has_repo = True
-                else:
-                    # dig into this directory and look for nested repos
-                    child_repos, child_norepo = _crawl(subdir)
-                    norepo.extend(child_norepo)
-                    if len(child_repos) > 0:
-                        repos.update(child_repos)
-                        has_repo = True
-
-            # if we haven't found any nested repos, just return the path name
-            if not has_repo:
-                return repos, [path]
+            if add_repo(path, rootpath, repos):
+                return (repos, [])
             else:
-                return repos, norepo
+                norepo = []
+                has_repo = False
+                # get subdirectories of current path only
+                # (a lot faster than listdir())
+                for _, subdirs, files in os.walk(path):
+                    break
+
+                # then realign path name to rootpath and crawl subdirectories
+                subdirs = map(lambda name: os.path.join(path, name), subdirs)
+                for subdir in subdirs:
+                    if not add_repo(subdir, rootpath, repos):
+                        # dig into this directory and look for nested repos
+                        child_repos, child_norepo = _crawl(subdir)
+                        norepo.extend(child_norepo)
+                        repos.update(child_repos)
+
+                # if we're in the toplevel override results to report root
+                # directory as single elementwith no repository found.
+                if len(repos) == 0 and (path == rootpath):
+                    norepo, files = [path], []
+
+                # print warnings if there are repositories, but also ...
+                if (len(repos) > 0) or (path == rootpath):
+                    # ... unrelated directories ...
+                    if len(norepo) > 0:
+                        for subdir in norepo:
+                            warning('No git repositories found in %s'% (
+                                subdir,
+                            ))
+
+                    # ... or unrelated files
+                    if len(files) > 0:
+                        warning('Files outside a git repository in %s' %(
+                            path,
+                        ))
+
+                return repos, [path] if len(repos) == 0 else []
 
         # perform the crawling search
         repos, norepo = _crawl(rootpath)
-        for subdir in norepo:
-            warning('No git repositories found in %s'% (subdir, ))
-
         return (repos, rootpath)
 
     class Progress(git.remote.RemoteProgress):
@@ -402,11 +413,11 @@ if __name__ == '__main__':
                                     remote_refs[hash_refs[1]] = hash_refs[0]
 
                         if len(remote_refs) == 0:
-                            warning('%s:%s (%s) reports no refs.' %(
+                            warning('%s:%s (%s) reports no refs' %(
                                 repopath, remote, url
                             ))
                         elif args.verbose:
-                            info('%s:%s (%s) available.' %(
+                            info('%s:%s (%s) available' %(
                                 repopath, remote, url
                             ))
 
@@ -417,7 +428,7 @@ if __name__ == '__main__':
                         ))
                         failed = failed + 1
 
-        info('Pinging %d of %d remotes successful.'% (
+        info('Pinging %d of %d remotes successful'% (
             successful, successful + failed
         ))
 
@@ -447,7 +458,7 @@ if __name__ == '__main__':
 
                 if len(repo.remotes) == 0:
                     talked = True
-                    warning(status + ' has no remotes.')
+                    warning(status + ' has no remotes')
 
                 if branch == DETACHED or len(repo.active_branch.log()) == 0:
                     if args.verbose:
@@ -488,7 +499,7 @@ if __name__ == '__main__':
                     if untracked > 0:
                         warning(status)
                     elif args.verbose:
-                        info(status + ' OK.')
+                        info(status + ' OK')
 
             except git.exc.GitCommandError as e:
                 error('Error checking ''%s'': %s' %(repopath, repr(e)))

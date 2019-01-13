@@ -76,8 +76,10 @@ relief it a bit. However, this is quite dangerous if you have no means to make
 sure that you never put anything else inside it by accident and left it there.
 
 PINGIT warns if it encounters directories not containing git repositories every
-time it scans a directory tree. If your intention is to identify such dangers
-it is advised to use `pingit status` as it will also report if you have some
+time it scans a directory tree. Further, if it identifies files outside such a
+directory that are unbeknownst to any git repositories, these files will also
+be reported. If your intention is to identify such dangers of leftover files it
+is advised to use `pingit status` as it will also report if you have some
 repositories with dirty stage-areas, untracked files or simply unpublished
 commits.
 
@@ -88,16 +90,12 @@ reported.
 
     nutzer@dev:~/Git/github$ pingit status
     WARNING:root:No git repositories found in ~/Git/github/foo-data
+    WARNING:root:Files outside a git repository in ~/Git/github.
     WARNING:root:PINGIT <master> (1 untracked files) contains uncommited stages (dirty)
     WARNING:root:chefkoch <master>  contains uncommited stages (dirty)
     WARNING:root:fastmat <circulant-merge>  is ahead of origin by 1 commits
     WARNING:root:fastmat <circulant-merge>  contains uncommited stages (dirty)
     nutzer@dev:~/Git/github$
-
-
-NOTE: Currently, PINGIT only warns about non-git-related directories and
-      ignores stray files outside of git repositories but inside the git
-      collection container.
 
 
 NOTE: Repositories that are up-to-date and require no attention do not produce
