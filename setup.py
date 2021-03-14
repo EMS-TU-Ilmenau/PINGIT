@@ -49,7 +49,7 @@ if __name__ == '__main__':
         description=('PINGIT batch management tool for multiple nested git ' +
                      'repositories'),
         long_description='''
-        PNIGIT - PINGIT Is Not a Git Indexing Tool
+        PINGIT - PINGIT Is Not a Git Indexing Tool
         ''',
         author='Christoph Wagner, EMS Research Group TU Ilmenau',
         author_email='christoph.wagner@tu-ilmenau.de',
